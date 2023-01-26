@@ -1,23 +1,27 @@
 {
-  "id": 0,
-  "size": 8,
+  "id": 1,
+  "size": 6,
   "pieces": [
-    ["blue", "F", "right center", 0], ["cyan", "F", "right center", 270], ["blue", "F", "top center", 0],
-    ["blue", "F", "top center", 0], ["blue", "F", "bottom right", 180], ["blue", "F", "left center", 90],
-    ["blue", "F", "top left", 0], ["blue", "F", "bottom right", 180]
+    ["orange", "Y", "top right", 0], ["grey", "Y", "top right", 90], ["orange", "Y", "top left", 270],
+    ["orange", "Y", "top left", 270], ["orange", "Y", "bottom right", 270], ["orange", "Y", "bottom right", 270]
   ],
-  "target": 0,
+  "target": 5,
   "refs": [
     {
       "user": "ia",
-      "instr": "Take the blue piece in the right center",
+      "instr": "Take the orange piece in the bottom right",
       "type": 2,
-      "sent_type": 1463,
+      "sent_type": 907,
       "props": {
-        "color": "blue",
-        "rel_position": "right center"
+        "color": "orange",
+        "rel_position": "bottom right"
       }
     }
   ],
-  "split_name": "data_train"
+  "bboxes": [
+    [149, 179, 37, 52], [171, 186, 14, 44], [29, 44, 22, 52], [59, 74, 7, 37], [164, 179, 171, 201],
+    [186, 201, 194, 224]
+  ],
+  "global_id": 123147,
+  "split_name": "data_val"
 }

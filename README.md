@@ -96,30 +96,9 @@ python3 scripts/generate_annos_check.py \
     --naive_dir /data/pento_diaref/naive
 ```
 
-### Data format: Annotation
-
-```
-{'id': 1,
- 'size': 7,
- 'pieces': [['blue', 'F', 'top left', 90],
-  ['olive green', 'F', 'top left', 180],
-  ['blue', 'F', 'top right', 0],
-  ['blue', 'F', 'top center', 0],
-  ['blue', 'F', 'left center', 90],
-  ['blue', 'F', 'right center', 270],
-  ['blue', 'F', 'right center', 270]],
- 'target': 1,
- 'refs': [{'user': 'ia',
-   'instr': 'Take the olive green piece',
-   'type': 0,
-   'sent_type': 1441,
-   'props': {'color': 'olive green'}}],
- 'global_id': 1,
- 'split_name': 'data_train'
-}
-```
-
 ### Create the images for the `DIDACT` dataset
+
+The generation process takes about 3 hours (more or less depending on the machine).
 
 ```
 python3 scripts/generate_images_didactic.py \
@@ -135,6 +114,8 @@ in the h5py. So the annotation id becomes the position in the h5yp file and the 
 
 ### Create the images for the `NAIVE` dataset
 
+The generation process takes about 3 hours (more or less depending on the machine).
+
 ```
 python3 scripts/generate_images_naive.py \
     --data_dir /data/pento_diaref/naive \
@@ -145,4 +126,175 @@ python3 scripts/generate_images_naive.py \
 
 ### Data format: Annotation with Bounding Boxes
 
-...
+```
+{
+  "id": 1,
+  "size": 6,
+  "pieces": [
+    ["orange", "Y", "top right", 0], ["grey", "Y", "top right", 90], ["orange", "Y", "top left", 270],
+    ["orange", "Y", "top left", 270], ["orange", "Y", "bottom right", 270], ["orange", "Y", "bottom right", 270]
+  ],
+  "target": 5,
+  "refs": [
+    {
+      "user": "ia",
+      "instr": "Take the orange piece in the bottom right",
+      "type": 2,
+      "sent_type": 907,
+      "props": {
+        "color": "orange",
+        "rel_position": "bottom right"
+      }
+    }
+  ],
+  "bboxes": [
+    [149, 179, 37, 52], [171, 186, 14, 44], [29, 44, 22, 52], [59, 74, 7, 37], [164, 179, 171, 201],
+    [186, 201, 194, 224]
+  ],
+  "global_id": 123147,
+  "split_name": "data_val"
+}
+```
+
+## Training
+
+### Train the Classifier+VSE model on `DIDACT`
+
+The data mode `sequential_generation` is assumed (should not be changed)
+
+```
+python3 scripts/train_classifier_vse.py \
+    --data_dir /data/pento_diaref/didact \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name classifier-vse-didact \
+    --batch_size 24 \
+    --d_model 512
+```
+
+### Train the Classifier+VSE model on `NAIVE`
+
+The data mode `sequential_generation` is assumed (should not be changed)
+
+```
+python3 scripts/train_classifier_vse.py \
+    --data_dir /data/pento_diaref/naive \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name classifier-vse-naive \
+    --batch_size 24 \
+    --d_model 512
+```
+
+### Train the Transformer+VSE model on `DIDACT`
+
+We use the data mode `sequential_generation`
+
+```
+python3 scripts/train_transformer.py \
+    --data_dir /data/pento_diaref/didact \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name transformer-vse-didact \
+    --data_mode sequential_generation \
+    --batch_size 24 \
+    --d_model 512 \
+    --dim_feedforward 1024 \
+    --num_encoder_layers 3 \
+    --num_decoder_layers 3 \
+    --n_head 4 \
+    --dropout 0.2
+```
+
+### Train the Transformer+VSE model on `NAIVE`
+
+We use the data mode `sequential_generation`
+
+```
+python3 scripts/train_transformer.py \
+    --data_dir /data/pento_diaref/naive \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name transformer-vse-naive \
+    --data_mode sequential_generation \
+    --batch_size 24 \
+    --d_model 512 \
+    --dim_feedforward 1024 \
+    --num_encoder_layers 3 \
+    --num_decoder_layers 3 \
+    --n_head 4 \
+    --dropout 0.2
+```
+
+### Train the Transformer model on `DIDACT`
+
+We use the data mode `default_generation`
+
+```
+python3 scripts/train_transformer.py \
+    --data_dir /data/pento_diaref/didact \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name transformer-didact \
+    --data_mode default_generation \
+    --batch_size 24 \
+    --d_model 512 \
+    --dim_feedforward 1024 \
+    --num_encoder_layers 3 \
+    --num_decoder_layers 3 \
+    --n_head 4 \
+    --dropout 0.2
+```
+
+### Train the Transformer model on `NAIVE`
+
+We use the data mode `default_generation`
+
+```
+python3 scripts/train_transformer.py \
+    --data_dir /data/pento_diaref/naive \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name transformer-naive \
+    --data_mode default_generation \
+    --batch_size 24 \
+    --d_model 512 \
+    --dim_feedforward 1024 \
+    --num_encoder_layers 3 \
+    --num_decoder_layers 3 \
+    --n_head 4 \
+    --dropout 0.2
+```
+
+
+### Train the LSTM model on `DIDACT`
+
+The data mode `default_generation` is assumed (should not be changed)
+
+```
+python3 scripts/train_lstm.py \
+    --data_dir /data/pento_diaref/didact \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name lstm-didact \
+    --batch_size 24 \
+    --lstm_hidden_size 1024 \
+    --word_embedding_dim 512 \
+    --dropout 0.5
+```
+
+### Train the LSTM model on `NAIVE`
+
+The data mode `default_generation` is assumed (should not be changed)
+
+```
+python3 scripts/train_lstm.py \
+    --data_dir /data/pento_diaref/naive \
+    --logdir /cache/tensorboard-logdir \
+    --gpu 0 \
+    --model_name lstm-naive \
+    --batch_size 24 \
+    --lstm_hidden_size 1024 \
+    --word_embedding_dim 512 \
+    --dropout 0.5
+```
