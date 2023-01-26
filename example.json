@@ -1,0 +1,23 @@
+{
+  "id": 0,
+  "size": 8,
+  "pieces": [
+    ["blue", "F", "right center", 0], ["cyan", "F", "right center", 270], ["blue", "F", "top center", 0],
+    ["blue", "F", "top center", 0], ["blue", "F", "bottom right", 180], ["blue", "F", "left center", 90],
+    ["blue", "F", "top left", 0], ["blue", "F", "bottom right", 180]
+  ],
+  "target": 0,
+  "refs": [
+    {
+      "user": "ia",
+      "instr": "Take the blue piece in the right center",
+      "type": 2,
+      "sent_type": 1463,
+      "props": {
+        "color": "blue",
+        "rel_position": "right center"
+      }
+    }
+  ],
+  "split_name": "data_train"
+}
