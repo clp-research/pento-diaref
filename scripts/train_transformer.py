@@ -41,10 +41,10 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--data_dir", type=str, required=True)
     parser.add_argument("--logdir", default="/cache/tensorboard-logdir")
-    parser.add_argument("--model_name", type=str, default="transformer")  # data cleaned
+    parser.add_argument("--model_name", type=str, default="transformer")
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--dry_run", action='store_true')
-    parser.add_argument("--gpu", type=int)  # select a specific gpu
+    parser.add_argument("--gpu", type=int, default=0)  # select a specific gpu
     parser = LitTransformerModel.add_model_specific_args(parser)
     # parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()

@@ -158,6 +158,8 @@ python3 scripts/generate_images_naive.py \
 
 ## Training
 
+The models will be saved to `saved_models` in the project folder.
+
 ### Train the Classifier+VSE model on `DIDACT`
 
 The data mode `sequential_generation` is assumed (should not be changed)
@@ -266,7 +268,6 @@ python3 scripts/train_transformer.py \
     --dropout 0.2
 ```
 
-
 ### Train the LSTM model on `DIDACT`
 
 The data mode `default_generation` is assumed (should not be changed)
@@ -297,4 +298,84 @@ python3 scripts/train_lstm.py \
     --lstm_hidden_size 1024 \
     --word_embedding_dim 512 \
     --dropout 0.5
+```
+
+## Evaluation
+
+Choose the best model for each case and move them to the `saved_models` folder.
+We used the model with the highest BLEU score and if equal, the most epochs trained on.
+
+```
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --results_dir results \
+    --model_dir saved_models \
+    --model_name <model_name> \
+    --stage_name <stage_name> \
+    --gpu 0 \
+```
+
+### Evaluate `NAIVE`-ly trained models
+
+```
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name lstm-naive \
+    --stage_name test \
+    --gpu 0
+
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-naive \
+    --stage_name test \
+    --gpu 0
+
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-vse-naive \
+    --stage_name test \
+    --gpu 0
+
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name classifier-vse-naive \
+    --stage_name test \
+    --gpu 0
+```
+
+### Evaluate `DIDACT`-icly trained models
+
+```
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name lstm-didact \
+    --stage_name test \
+    --gpu 0
+
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-didact \
+    --stage_name test \
+    --gpu 0
+
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-vse-didact \
+    --stage_name test \
+    --gpu 0
+
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name classifier-vse-didact \
+    --stage_name test \
+    --gpu 0
+```
+
+## Compute the results
+
+```
+python3 scripts/evaluate_results.py \
+    --data_dir /data/pento_diaref/didact \
+    --results_dir results \
+    --stage_name test
 ```
