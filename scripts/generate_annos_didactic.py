@@ -1,6 +1,7 @@
 import argparse
 import os.path
-import sys
+import random
+import numpy as np
 
 from golmi.contrib.pentomino.symbolic.types import Shapes, Colors, RelPositions
 
@@ -147,9 +148,13 @@ if __name__ == '__main__':
     parser.add_argument("-g", '--gid_start', type=int, default=0,
                         help="Offset for the global_id of the annotations")
     parser.add_argument("-v", '--verbose', action="store_true")
+    parser.add_argument("-S", '--seed', type=int, default=None)
     args = parser.parse_args()
     if not os.path.exists(args.data_dir):
         raise Exception("data_dir does not exist. Please create it and try again.")
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
     cli(args.data_dir,
         args.train_num_sets_per_utterance_type,
         args.test_num_sets_per_utterance_type,

@@ -1,6 +1,9 @@
 import itertools
 import os
 import argparse as argparse
+import random
+import numpy as np
+
 from golmi.contrib.pentomino.symbolic.types import Shapes, Colors, RelPositions, SymbolicPiece
 
 from pentodiaref.data.generation.checks import check_color_split_counts, check_pos_split_counts
@@ -66,9 +69,13 @@ if __name__ == '__main__':
     parser.add_argument("-ho", '--with_ho', action="store_true",
                         help="Whether to calculate a holdout from the possible target piece symbols.")
     parser.add_argument("-v", '--verbose', action="store_true")
+    parser.add_argument("-S", '--seed', type=int, default=None)
     args = parser.parse_args()
     if not os.path.exists(args.data_dir):
         raise Exception("data_dir does not exist. Please create it and try again.")
+    if args.seed is not None:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
     cli(args.data_dir,
         args.with_ho,
         args.gid_start,
