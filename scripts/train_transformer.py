@@ -8,7 +8,7 @@ import pytorch_lightning as pl
 
 from pentodiaref.models.transformer import LitTransformerModel
 
-torch.set_num_threads(3)
+torch.set_num_threads(2)
 
 
 def main(args):

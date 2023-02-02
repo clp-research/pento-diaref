@@ -7,7 +7,7 @@ from pentodiaref.models.classifier import LitClassifierModel
 from datetime import datetime
 import pytorch_lightning as pl
 
-torch.set_num_threads(3)
+torch.set_num_threads(2)
 
 
 def main(args):
