@@ -41,7 +41,8 @@ python3 scripts/generate_annos_didactic.py \
     --data_dir /data/pento_diaref/didact \
     --train_num_sets_per_utterance_type 10 \
     --test_num_sets_per_utterance_type 1 \
-    --gid_start 0
+    --gid_start 0 \
+    --seed 42
 ```
 
 This will create `148,400/10,000/10,000` in-distribution samples for training/validation/testing
@@ -50,7 +51,7 @@ for the color, position and utterance type generalization tests.
 
 The script additionally filters out training samples where the extra target selection accidentally
 produced a sample that has an utterance type reserved for the uts-holdout. So the remaining number
-of training samples is probably between 120k-130k.
+of in-distribution training samples is probably between 120k-130k.
 
 Note: During training, we only use the in-distribution validation samples for model selection.
 
@@ -74,7 +75,8 @@ Then execute the script
 python3 scripts/generate_annos_naive.py -ho \
     --data_dir /data/pento_diaref/naive \
     --with_ho \
-    --gid_start 1_000_000
+    --gid_start 1_000_000 \
+    --seed 42
 ```
 
 This will create `148,400/10,000/10,000` in-distribution samples for training/validation/testing
@@ -82,13 +84,13 @@ using the same target piece symbols as above. For generalization testing we use 
 
 Note: The holdouts computation is deterministic and only depends on the order
 in the color, shape and position listings because we use `itertools.product(colors, shapes, positions)`.
-Thus, the target piece symbols seen during training are the same as above.
+Thus, the target piece symbols seen during training are the same as for `DIDACT`.
 
 ### Check targets symbols for training
 
 We briefly check the number of target piece symbols contained in the in-distribution samples.
-These are a bit lower for the ``DIDACT`` training, because we removed the unintended samples for the uts-holdut.
-Overall the numbers should not vary too much between ``DIDACT`` and ``NAIVE``.
+These might be a bit lower for the ``DIDACT`` training, because we removed unintended samples for the uts-holdout.
+Overall the numbers should not vary too much between ``DIDACT`` and ``NAIVE`` (ideally be zero).
 
 ```
 python3 scripts/generate_annos_check.py \
@@ -98,63 +100,57 @@ python3 scripts/generate_annos_check.py \
 
 ### Create the images for the `DIDACT` dataset
 
-The generation process takes about 3 hours (more or less depending on the machine).
+The generation process takes about an hour (more or less depending on the machine).
 
 ```
 python3 scripts/generate_images_didactic.py \
     --data_dir /data/pento_diaref/didact \
     --image_size 224 224 \
-    --split_name all \
-    --force_reindex
+    --category_name all \
+    --seed 42
 ```
-
-Note: The ``-force_reindex`` option is necessary to align annotation ids with the positions of the images in the h5py
-files. For example, the image for a validation annotation with id 120_000 might be located at the 1_000 position
-in the h5py. So the annotation id becomes the position in the h5yp file and the global_id is the general identifier.
 
 ### Create the images for the `NAIVE` dataset
 
-The generation process takes about 3 hours (more or less depending on the machine).
+The generation process takes about an hour (more or less depending on the machine).
 
 ```
 python3 scripts/generate_images_naive.py \
     --data_dir /data/pento_diaref/naive \
     --image_size 224 224 \
-    --split_name all \
-    --force_reindex
+    --seed 42
 ```
 
 ### Data format: Annotation with Bounding Boxes
 
 ```
-{
-  "id": 1,
-  "size": 6,
-  "pieces": [
-    ["orange", "Y", "top right", 0], ["grey", "Y", "top right", 90], ["orange", "Y", "top left", 270],
-    ["orange", "Y", "top left", 270], ["orange", "Y", "bottom right", 270], ["orange", "Y", "bottom right", 270]
-  ],
-  "target": 5,
-  "refs": [
-    {
-      "user": "ia",
-      "instr": "Take the orange piece in the bottom right",
-      "type": 2,
-      "sent_type": 907,
-      "props": {
-        "color": "orange",
-        "rel_position": "bottom right"
-      }
-    }
-  ],
-  "bboxes": [
-    [149, 179, 37, 52], [171, 186, 14, 44], [29, 44, 22, 52], [59, 74, 7, 37], [164, 179, 171, 201],
-    [186, 201, 194, 224]
-  ],
-  "global_id": 123147,
-  "split_name": "data_val"
+{'id': 148294,
+ 'group_id': 37073,
+ 'size': 6,
+ 'pieces': [('orange', 'Y', 'top center', 0),
+  ('orange', 'Z', 'top right', 180),
+  ('orange', 'W', 'bottom center', 90),
+  ('orange', 'V', 'right center', 0),
+  ('orange', 'V', 'bottom right', 0),
+  ('orange', 'P', 'top center', 180)],
+ 'target': 3,
+ 'refs': [{'user': 'ia',
+   'instr': 'Take the V in the right center',
+   'type': 5,
+   'sent_type': 1266,
+   'props': {'shape': 'V', 'rel_position': 'right center'}}],
+ 'bboxes': [[82, 112, 44, 59],
+  [164, 186, 37, 59],
+  [134, 156, 171, 194],
+  [156, 179, 112, 134],
+  [194, 216, 179, 201],
+  [126, 141, 67, 89]],
+ 'global_id': 0,
+ 'split_name': 'data_train'
 }
 ```
+
+Note: The ``group_id`` points to the image in the hdf5 file.
 
 ## Training
 
@@ -168,7 +164,7 @@ The data mode `sequential_generation` is assumed (should not be changed)
 python3 scripts/train_classifier_vse.py \
     --data_dir /data/pento_diaref/didact \
     --logdir /cache/tensorboard-logdir \
-    --gpu 0 \
+    --gpu 7 \
     --model_name classifier-vse-didact \
     --batch_size 24 \
     --d_model 512
@@ -182,7 +178,7 @@ The data mode `sequential_generation` is assumed (should not be changed)
 python3 scripts/train_classifier_vse.py \
     --data_dir /data/pento_diaref/naive \
     --logdir /cache/tensorboard-logdir \
-    --gpu 0 \
+    --gpu 6 \
     --model_name classifier-vse-naive \
     --batch_size 24 \
     --d_model 512
@@ -196,7 +192,7 @@ We use the data mode `sequential_generation`
 python3 scripts/train_transformer.py \
     --data_dir /data/pento_diaref/didact \
     --logdir /cache/tensorboard-logdir \
-    --gpu 0 \
+    --gpu 4 \
     --model_name transformer-vse-didact \
     --data_mode sequential_generation \
     --batch_size 24 \
@@ -216,7 +212,7 @@ We use the data mode `sequential_generation`
 python3 scripts/train_transformer.py \
     --data_dir /data/pento_diaref/naive \
     --logdir /cache/tensorboard-logdir \
-    --gpu 0 \
+    --gpu 3 \
     --model_name transformer-vse-naive \
     --data_mode sequential_generation \
     --batch_size 24 \
@@ -236,7 +232,7 @@ We use the data mode `default_generation`
 python3 scripts/train_transformer.py \
     --data_dir /data/pento_diaref/didact \
     --logdir /cache/tensorboard-logdir \
-    --gpu 0 \
+    --gpu 2 \
     --model_name transformer-didact \
     --data_mode default_generation \
     --batch_size 24 \
@@ -256,7 +252,7 @@ We use the data mode `default_generation`
 python3 scripts/train_transformer.py \
     --data_dir /data/pento_diaref/naive \
     --logdir /cache/tensorboard-logdir \
-    --gpu 0 \
+    --gpu 1 \
     --model_name transformer-naive \
     --data_mode default_generation \
     --batch_size 24 \
@@ -277,6 +273,7 @@ python3 scripts/train_lstm.py \
     --data_dir /data/pento_diaref/didact \
     --logdir /cache/tensorboard-logdir \
     --gpu 0 \
+    --gpu_fraction 0.3 \
     --model_name lstm-didact \
     --batch_size 24 \
     --lstm_hidden_size 1024 \
@@ -293,6 +290,7 @@ python3 scripts/train_lstm.py \
     --data_dir /data/pento_diaref/naive \
     --logdir /cache/tensorboard-logdir \
     --gpu 0 \
+    --gpu_fraction 0.3 \
     --model_name lstm-naive \
     --batch_size 24 \
     --lstm_hidden_size 1024 \
@@ -312,7 +310,7 @@ python3 scripts/evaluate_model.py \
     --model_dir saved_models \
     --model_name <model_name> \
     --stage_name <stage_name> \
-    --gpu 0 \
+    --gpu 0
 ```
 
 ### Evaluate `NAIVE`-ly trained models
@@ -322,7 +320,8 @@ python3 scripts/evaluate_model.py \
     --data_dir /data/pento_diaref/didact \
     --model_name lstm-naive \
     --stage_name test \
-    --gpu 0
+    --gpu 0 \
+    --gpu_fraction 0.3
 
 python3 scripts/evaluate_model.py \
     --data_dir /data/pento_diaref/didact \
@@ -343,14 +342,15 @@ python3 scripts/evaluate_model.py \
     --gpu 0
 ```
 
-### Evaluate `DIDACT`-icly trained models
+### Evaluate `DIDACT`-ively trained models
 
 ```
 python3 scripts/evaluate_model.py \
     --data_dir /data/pento_diaref/didact \
     --model_name lstm-didact \
     --stage_name test \
-    --gpu 0
+    --gpu 0 \
+    --gpu_fraction 0.3
 
 python3 scripts/evaluate_model.py \
     --data_dir /data/pento_diaref/didact \
@@ -372,6 +372,8 @@ python3 scripts/evaluate_model.py \
 ```
 
 ## Compute the results
+
+We need to reference the data dir to load the annotations and lookup get the category name.
 
 ```
 python3 scripts/evaluate_results.py \
