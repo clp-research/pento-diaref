@@ -54,9 +54,10 @@ class Reference:
 
 class Annotation:
 
-    def __init__(self, anno_id: int, target_idx: int, group: SymbolicPieceGroup, refs: List[Reference],
+    def __init__(self, anno_id: int, group_id: int, target_idx: int, group: SymbolicPieceGroup, refs: List[Reference],
                  bboxes: List[Tuple] = None, global_id: int = None, split_name: str = None):
         self.target_idx = target_idx
+        self.group_id = group_id
         self.refs = refs
         self.group = group
         self.anno_id = anno_id  # split-id
@@ -68,13 +69,14 @@ class Annotation:
         return self.to_json()
 
     def __repr__(self):
-        if self.global_id:
-            return f"Annotation(gid:{self.global_id},sid:{self.anno_id})"
-        return f"Annotation(sid:{self.anno_id})"
+        if self.global_id is not None:
+            return f"Annotation(gid:{self.global_id},sid:{self.anno_id},iid:{self.group_id})"
+        return f"Annotation(sid:{self.anno_id},iid:{self.group_id})"
 
     def to_json(self):
         d = {
             "id": self.anno_id,
+            "group_id": self.group_id,
             "size": len(self.group),
             "pieces": self.group.to_json(),
             "target": self.target_idx,
@@ -93,8 +95,9 @@ class Annotation:
         refs = [Reference.from_json(r) for r in json_annotation["refs"]]
         group = SymbolicPieceGroup.from_json(json_annotation["pieces"])
         annos_id = json_annotation["id"]
+        group_id = json_annotation["group_id"]
         target_idx = json_annotation["target"]
-        anno = Annotation(annos_id, target_idx, group, refs)
+        anno = Annotation(annos_id, group_id, target_idx, group, refs)
         if "bboxes" in json_annotation:
             anno.bboxes = json_annotation["bboxes"]
         if "global_id" in json_annotation:

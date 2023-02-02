@@ -92,6 +92,8 @@ def collect_and_store_annotations(data_dir, splits, category_name, split_name,
     if filename == "data":  # training data
         if test_split_size is None:
             test_split_size = int(len(samples) * .1)  # 10 percent test splits size
+
+        random.shuffle(samples)
         te, ts = len(samples) - 2 * test_split_size, test_split_size
         train, val, test = samples[:te], samples[te:te + ts], samples[te + ts:]
 
@@ -162,7 +164,8 @@ def collect_samples_utterance_oriented(uts_dicts: Dict,
     print("Estimated number of samples", total_estimate)
     # CLEVR produces 1,000,000 questions (here: ref. exps.)
     counter_loop = tqdm(range(total_estimate), position=0, leave=True)
-    counter = 0
+    group_idx_counter = 0
+    idx_counter = 0
     for piece_tup, uts_dict in uts_dicts.items():
         for position in uts_dict["positions"]:
             target_piece = SymbolicPiece(color=piece_tup[1], shape=piece_tup[0], rel_position=position)
@@ -181,9 +184,10 @@ def collect_samples_utterance_oriented(uts_dicts: Dict,
                     if num_extra_targets > 0:
                         target_indices += random.sample(list(range(len(piece_group)))[1:], num_extra_targets)
                     for target_idx in target_indices:
-                        sample = generate_referring_expression(counter, piece_group, target_idx, [pia_csp], sent_types)
+                        sample = generate_referring_expression(idx_counter, group_idx_counter,
+                                                               piece_group, target_idx, [pia_csp], sent_types)
                         samples.append(sample)
-                        counter += 1  # starting the ids with 0 for easier reference of the images in the h5py
+                        idx_counter += 1
                         # check that utterance-type matches ia prediction
                         # Note: we can only do this for the pieces for which the board was created initially
                         if target_idx == 0:
@@ -193,8 +197,9 @@ def collect_samples_utterance_oriented(uts_dicts: Dict,
                                 f"target_piece: {target_piece}\n" \
                                 f"piece_list: {piece_group}\n"
                         counter_loop.update()
-                        if counter % 100 == 0:
+                        if idx_counter % 100 == 0:
                             counter_loop.refresh()
+                    group_idx_counter += 1
                 pos_errors.update(check_position_restriction(distractors_groups))
     counter_loop.refresh()
     print("Position exceptions:", len(pos_errors))

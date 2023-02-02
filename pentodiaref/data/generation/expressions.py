@@ -50,7 +50,7 @@ def __collect_ref(pia, pieces: SymbolicPieceGroup, target: SymbolicPiece, sent_t
     return Reference("ia", ut_idx, sent_type, expression, property_values)
 
 
-def generate_referring_expression(sample_idx, piece_group: SymbolicPieceGroup, target_idx: int,
+def generate_referring_expression(sample_idx: int, group_idx: int, piece_group: SymbolicPieceGroup, target_idx: int,
                                   pias: List[PentoIncrementalAlgorithm],
                                   sent_types: Dict[str, Dict] = None):
     target_piece = piece_group[target_idx]
@@ -58,4 +58,4 @@ def generate_referring_expression(sample_idx, piece_group: SymbolicPieceGroup, t
     for pia in pias:
         ref = __collect_ref(pia, piece_group, target_piece, sent_types)
         refs.append(ref)
-    return Annotation(sample_idx, target_idx, piece_group, refs)
+    return Annotation(sample_idx, group_idx, target_idx, piece_group, refs)

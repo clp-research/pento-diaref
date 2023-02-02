@@ -104,7 +104,8 @@ class PentoBoardsDataset(torch.utils.data.Dataset):
     Images are numpy arrays in the hdf5 file at the anno_id index.
     """
 
-    def __init__(self, vocab, category: str, split: str, data_dir: str, mode: DataMode, max_pieces: int = None):
+    def __init__(self, vocab, category_name: str, split_name: str, data_dir: str, mode: DataMode,
+                 max_pieces: int = None):
         self.mode = mode if isinstance(mode, DataMode) else DataMode(mode)
         if self.mode.is_sequential():
             if max_pieces is None:
@@ -115,15 +116,17 @@ class PentoBoardsDataset(torch.utils.data.Dataset):
             self.tokenizer = get_tokenizer()
             self.end_token = vocab(["<e>"])  # here we use the returned list
             self.pad_token = vocab(["<p>"])[0]
-        self.category = category
-        self.split = split
-        self.data_name = f"{category}_{split}"
+        self.category = category_name
+        self.split = split_name
+        self.data_name = f"{category_name}_{split_name}"
         self.annotations = load_annotations(data_dir, self.data_name)
-        file_path = os.path.join(data_dir, self.data_name + ".boards.hdf5")
+        if category_name == "data":
+            print("Category 'data' detected")
+            file_path = os.path.join(data_dir, "data.boards.hdf5")
+        else:
+            file_path = os.path.join(data_dir, self.data_name + ".boards.hdf5")
         self.images_files = h5py.File(file_path, "r")  # close later again!
-        count_images = len(self.images_files["images"])
-        assert len(self.annotations) == count_images, \
-            f"There should be as many annotations as images, but {len(self.annotations)} != {count_images}"
+        print(f"Loaded {len(self.images_files['images'])} images")
         self.height, self.width, self.channels = self.images_files["images"][0].shape  # probe for sizes
         self.piece_transform = transforms.Compose([ToTensor(),
                                                    Resize(size=(self.height, self.width)),
@@ -135,7 +138,7 @@ class PentoBoardsDataset(torch.utils.data.Dataset):
         # "flatten" annotations based on refs.
         # For now there is only one ref per annotation, but there might be more in future
         self.refs = [(ref, anno) for anno in self.annotations for ref in anno["refs"]]
-        if mode.is_subsample() and split == "train":
+        if mode.is_subsample() and split_name == "train":
             total = len(self.refs)
             subsample_size = int(total / 100 * mode.subsample_percentage)
             print(f"Sub-sample {subsample_size} data points (p={mode.subsample_percentage})")
@@ -147,7 +150,7 @@ class PentoBoardsDataset(torch.utils.data.Dataset):
     def __get_inputs(self, index):
         _, anno = self.refs[index]
         global_id = anno["global_id"]
-        context_image = self.images_files["images"][anno["id"]]
+        context_image = self.images_files["images"][anno["group_id"]]
         target_idx, bboxes = anno["target"], anno["bboxes"]
         target_image, target_attributes = crop_piece(context_image, target_idx, bboxes)
         target_image = self.piece_transform(target_image)
