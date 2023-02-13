@@ -10,7 +10,7 @@ from pentodiaref.metrics import update_metrics_with_translations, TextMeter
 
 class LitModelEvaluationWrapper(pl.LightningModule):
 
-    def __init__(self, model: pl.LightningModule, stage_name, model_name: str, data_dir: str,
+    def __init__(self, model: pl.LightningModule, stage_name, file_name: str, data_dir: str,
                  results_dir: str, batch_size: int, dry_run: bool = False):
         super(LitModelEvaluationWrapper, self).__init__()
         self.stage_name = stage_name
@@ -19,7 +19,7 @@ class LitModelEvaluationWrapper(pl.LightningModule):
         self.dry_run = dry_run
         self.data_dir = data_dir
         self.data_categories = ["data", "ho-color", "ho-pos", "ho-uts"]
-        self.eval_metrics = tm.MetricCollection(TextMeter(stage_name, model_name, results_dir))
+        self.eval_metrics = tm.MetricCollection(TextMeter(stage_name, file_name, results_dir))
         self.eval_data = None
 
     def configure_optimizers(self):

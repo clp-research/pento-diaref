@@ -413,6 +413,41 @@ python3 scripts/evaluate_model.py \
     --gpu 0
 ```
 
+## Ablation
+
+# Random images
+
+```
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-vse-didact \
+    --stage_name test \
+    --ablation_mode replace_random \
+    --gpu 0
+```
+
+# Random types
+
+```
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-vse-didact \
+    --stage_name test \
+    --ablation_mode random_types \
+    --gpu 0
+```
+
+# Random regions
+
+```
+python3 scripts/evaluate_model.py \
+    --data_dir /data/pento_diaref/didact \
+    --model_name transformer-vse-didact \
+    --stage_name test \
+    --ablation_mode random_regions \
+    --gpu 0
+```
+
 ## Compute the results
 
 We need to reference the data dir to load the annotations and lookup get the category name.
@@ -425,3 +460,4 @@ python3 scripts/evaluate_results.py \
 ```
 
 Original results can be found in the folder ``original_results``
+

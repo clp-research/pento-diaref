@@ -29,7 +29,7 @@ def load_model(ckpt_path, model_name, ablation_mode=None):
     if model_name.startswith("transformer"):
         model = LitTransformerModel.load_from_checkpoint(ckpt_path)
         if ablation_mode:
-            model.visual_sequence_encoding.ablation_mode = ablation_mode
+            model.visual_encoding.ablation_mode = ablation_mode
     if model is None:
         raise Exception(f"Cannot handle model '{model_name}' because it is unknown.")
     return model
@@ -39,14 +39,20 @@ def main(args):
     if args.gpu_fraction is not None:
         print("Set GPU fraction to:", args.gpu_fraction)
         torch.cuda.set_per_process_memory_fraction(args.gpu_fraction)
+    ablation_mode = args.ablation_mode
     ckpt_path = build_ckpt_path(args.model_dir, args.model_name)
-    model = load_model(ckpt_path, args.model_name, args.ablation_mode)
+    model = load_model(ckpt_path, args.model_name, ablation_mode)
     if not os.path.exists(args.results_dir):
         raise Exception(f"Please create a directory 'results' and try again.")
-    eval_model = LitModelEvaluationWrapper(model=model, stage_name=args.stage_name, model_name=args.model_name,
+    file_name = args.model_name
+    if ablation_mode:
+        file_name += "." + ablation_mode
+    eval_model = LitModelEvaluationWrapper(model=model, stage_name=args.stage_name, file_name=file_name,
                                            data_dir=args.data_dir, results_dir=args.results_dir,
                                            batch_size=args.batch_size, dry_run=args.dry_run)
     print("Detected GPU to use:", args.gpu)
+    if ablation_mode:
+        print("Detected ablation:", ablation_mode)
     trainer = pl.Trainer(accelerator="gpu",
                          devices=[args.gpu],
                          logger=False)
