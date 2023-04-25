@@ -48,10 +48,20 @@ with region embeddings on them.
 }
 ```
 
-## Cite Dataset
+## Dataset Citation
 
 ```
-Sadler, Philipp, & Schlangen, David. (2023). Pento-DIARef: A Diagnostic Dataset for Learning the Incremental Algorithm for Referring Expression Generation from Examples (v1.0) [Data set]. The 17th Conference of the European Chapter of the Association for Computational Linguistics (EACL), Dubrovnik, Croatia. Zenodo. https://doi.org/10.5281/zenodo.7625619
+@misc{sadler-2023-pento-diaref-dataset,
+    title = "Pento-DIARef: A Diagnostic Dataset for Learning the Incremental Algorithm for Referring Expression Generation from Examples",
+    author = "Sadler, Philipp and Schlangen, David",
+    booktitle = "Proceedings of the 17th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume",
+    month = "may",
+    year = "2023",
+    address = "Dubrovnik, Croatia",
+    publisher = "Association for Computational Linguistics",
+    doi = "10.5281/zenodo.7625619",
+    howpublished= "\url{https://doi.org/10.5281/zenodo.7625619}" 
+}
 ```
 
 # Reproduction
